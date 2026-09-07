@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinLit AI — Institutional Risk &amp; Capital Defense</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js" defer></script>
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+
+<!-- =========================================================================
+     INLINE SVG SPRITE
+     ========================================================================= -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <symbol id="i-logo" viewBox="0 0 32 32" fill="none">
+    <polygon points="16,2 30,10 30,22 16,30 2,22 2,10" stroke="#3B82F6" stroke-width="1.5" fill="rgba(59,130,246,.1)"/>
+    <polygon points="16,8 24,13 24,19 16,24 8,19 8,13"  stroke="#3B82F6" stroke-width="1"   fill="rgba(59,130,246,.18)"/>
+    <circle cx="16" cy="16" r="3.5" fill="#3B82F6"/>
+  </symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+  </symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+  </symbol>
+  <symbol id="i-pie" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>
+  </symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+  </symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+  </symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+  </symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  </symbol>
+  <symbol id="i-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+  </symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+  </symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/>
+    <line x1="9"  y1="1"  x2="9"  y2="4"/><line x1="15" y1="1"  x2="15" y2="4"/>
+    <line x1="9"  y1="20" x2="9"  y2="23"/><line x1="15" y1="20" x2="15" y2="23"/>
+    <line x1="20" y1="9"  x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/>
+    <line x1="1"  y1="9"  x2="4"  y2="9"/><line x1="1"  y1="14" x2="4"  y2="14"/>
+  </symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+  </symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/>
+    <path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+  </symbol>
+  <symbol id="i-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+  </symbol>
+</svg>
+
+<!-- =========================================================================
+     APP BAR
+     ========================================================================= -->
+<header class="app-bar" role="banner">
+  <div class="app-bar__inner">
+    <div class="app-bar__brand">
+      <svg class="brand-logo" aria-hidden="true"><use href="#i-logo"/></svg>
+      <div class="brand-copy">
+        <span class="brand-name">FinLit <strong>AI</strong></span>
+        <span class="brand-sub">INSTITUTIONAL RISK &amp; CAPITAL DEFENSE</span>
+      </div>
+    </div>
+    <div class="app-bar__right">
+      <div class="sys-pill">
+        <span class="sys-pill__dot" aria-hidden="true"></span>
+        <span>IBM Granite 3.0 &middot; watsonx.ai RAG &middot; Active</span>
+      </div>
+      <div class="engine-badge">
+        <svg aria-hidden="true"><use href="#i-db"/></svg>
+        <span id="healthStatus">TF-IDF Vector RAG</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- =========================================================================
+     TELEMETRY STRIP
+     ========================================================================= -->
+<div class="telemetry-strip" role="status" aria-label="System telemetry">
+  <div class="telemetry-strip__inner">
+    <div class="t-stat">
+      <span class="t-dot t-dot--green" aria-hidden="true"></span>
+      <span class="t-key">NPCI &amp; RBI Framework</span>
+      <span class="t-sep" aria-hidden="true"></span>
+      <span class="t-val">v2.4 Active</span>
+    </div>
+    <div class="t-divider" aria-hidden="true"></div>
+    <div class="t-stat">
+      <span class="t-dot t-dot--blue" aria-hidden="true"></span>
+      <span class="t-key">Threat Heuristics</span>
+      <span class="t-sep" aria-hidden="true"></span>
+      <span class="t-val" id="heuristicsCount">14 Active Rules</span>
+    </div>
+    <div class="t-divider" aria-hidden="true"></div>
+    <div class="t-stat">
+      <span class="t-dot t-dot--amber" aria-hidden="true"></span>
+      <span class="t-key">Governance</span>
+      <span class="t-sep" aria-hidden="true"></span>
+      <span class="t-val">Granite Hallucination Checks Enforced</span>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================================
+     GLOBAL TAB BAR
+     ========================================================================= -->
+<nav class="tab-bar" role="tablist" aria-label="Workspace navigation">
+  <div class="tab-bar__inner">
+    <button class="tab-pill tab-pill--active" data-tab="advisor" role="tab" aria-selected="true" aria-controls="ws-advisor">
+      <svg aria-hidden="true"><use href="#i-terminal"/></svg>
+      Advisory Console
+    </button>
+    <button class="tab-pill" data-tab="threat" role="tab" aria-selected="false" aria-controls="ws-threat">
+      <svg aria-hidden="true"><use href="#i-shield"/></svg>
+      Threat Detection Engine
+    </button>
+    <button class="tab-pill" data-tab="capital" role="tab" aria-selected="false" aria-controls="ws-capital">
+      <svg aria-hidden="true"><use href="#i-pie"/></svg>
+      Capital Allocator
+    </button>
+  </div>
+</nav>
+
+<!-- =========================================================================
+     ERROR TOAST
+     ========================================================================= -->
+<div id="errorToast" class="error-toast" role="alert" aria-live="assertive" hidden></div>
+
+<!-- =========================================================================
+     MAIN STAGE
+     ========================================================================= -->
+<main class="main-stage">
+
+  <!-- ───────────────────────────────────────────────────────────────────────
+       WORKSPACE 1 — ADVISORY CONSOLE
+       ─────────────────────────────────────────────────────────────────────── -->
+  <section id="ws-advisor" class="workspace workspace--active" role="tabpanel" aria-labelledby="tab-advisor">
+    <div class="advisor-layout">
+
+      <!-- LEFT: Chat Terminal -->
+      <div class="card console-card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg aria-hidden="true"><use href="#i-terminal"/></svg>
+            <span>&gt;_ Advisory Console</span>
+          </div>
+          <div class="live-badge" id="agentStatusLabel">
+            <span class="live-dot live-dot--green" aria-hidden="true"></span>
+            <span>All Agents Ready</span>
+          </div>
+        </div>
+
+        <div class="chat-stream" id="chatMessages" role="log" aria-live="polite" aria-label="Chat messages">
+          <!-- Boot system message -->
+          <article class="msg msg--system">
+            <header class="msg-meta">
+              <span class="msg-role">SYSTEM INIT</span>
+              <time class="msg-time" id="initTime"></time>
+            </header>
+            <div class="msg-body">
+              FinLit AI Advisory Console initialised. IBM Granite 3.0 language model active.
+              Pipeline: KnowledgeRetrieval &rarr; ScamGuard &rarr; BudgetPlanner &rarr; VernacularResponse.
+            </div>
+            <div class="ref-chips">
+              <a class="ref-chip ref-chip--blue" href="https://www.npci.org.in/what-we-do/upi/circular" target="_blank" rel="noopener noreferrer">
+                <svg aria-hidden="true"><use href="#i-lock"/></svg>NPCI UPI Framework
+              </a>
+              <a class="ref-chip ref-chip--blue" href="https://rbi.org.in/Scripts/PublicationReportDetails.aspx?UrlPage=&ID=1199" target="_blank" rel="noopener noreferrer">
+                <svg aria-hidden="true"><use href="#i-shield"/></svg>RBI Cyber Directives
+              </a>
+              <a class="ref-chip ref-chip--amber" href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer">
+                <svg aria-hidden="true"><use href="#i-alert"/></svg>cybercrime.gov.in
+              </a>
+            </div>
+          </article>
+        </div>
+
+        <!-- Quick-prompt pills -->
+        <div class="quick-row">
+          <span class="quick-label">QUICK QUERIES</span>
+          <div class="quick-chips">
+            <button class="q-chip" data-prompt="Check this UPI SMS: Click here to get your KYC refund of Rs 5000. Enter OTP to claim now.">Analyse UPI Scam SMS</button>
+            <button class="q-chip" data-prompt="Calculate my 50/30/20 budget for Rs 50000 monthly salary">Compute 50/30/20 Budget</button>
+            <button class="q-chip" data-prompt="What is a safe personal loan interest rate in India?">Safe Loan Rate</button>
+            <button class="q-chip" data-prompt="What is a Digital Arrest scam and how do I protect myself?">Digital Arrest Threat</button>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <form class="chat-input-row" id="chatForm" autocomplete="off" novalidate>
+          <div class="input-shell" id="inputShell">
+            <svg class="input-icon" aria-hidden="true"><use href="#i-terminal"/></svg>
+            <textarea id="chatInput" class="input-field" rows="1"
+              placeholder="Enter a financial query or paste suspicious text for analysis..."
+              aria-label="Chat input"></textarea>
+          </div>
+          <button type="submit" class="send-btn" id="sendBtn" aria-label="Send message">
+            <svg aria-hidden="true"><use href="#i-arrow"/></svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- RIGHT: Agent Observability Rail -->
+      <aside class="card obs-card" aria-label="Agent observability">
+        <div class="card-header">
+          <div class="card-title">
+            <svg aria-hidden="true"><use href="#i-activity"/></svg>
+            <span>Agent Observability</span>
+          </div>
+        </div>
+
+        <div class="agent-rail">
+          <div class="agent-row" id="agent-kb">
+            <div class="agent-icon agent-icon--blue"><svg aria-hidden="true"><use href="#i-book"/></svg></div>
+            <div class="agent-copy">
+              <div class="agent-name">KnowledgeRetrieval</div>
+              <div class="agent-spec">TF-IDF RAG &middot; KB Index</div>
+            </div>
+            <div class="state-badge state-badge--idle" id="state-kb">IDLE</div>
+          </div>
+          <div class="agent-row" id="agent-scam">
+            <div class="agent-icon agent-icon--red"><svg aria-hidden="true"><use href="#i-shield"/></svg></div>
+            <div class="agent-copy">
+              <div class="agent-name">ScamGuard</div>
+              <div class="agent-spec">14 Heuristic Rules</div>
+            </div>
+            <div class="state-badge state-badge--idle" id="state-scam">IDLE</div>
+          </div>
+          <div class="agent-row" id="agent-budget">
+            <div class="agent-icon agent-icon--green"><svg aria-hidden="true"><use href="#i-trend"/></svg></div>
+            <div class="agent-copy">
+              <div class="agent-name">BudgetPlanner</div>
+              <div class="agent-spec">50/30/20 Engine</div>
+            </div>
+            <div class="state-badge state-badge--idle" id="state-budget">IDLE</div>
+          </div>
+          <div class="agent-row" id="agent-granite">
+            <div class="agent-icon agent-icon--purple"><svg aria-hidden="true"><use href="#i-cpu"/></svg></div>
+            <div class="agent-copy">
+              <div class="agent-name">VernacularResponse</div>
+              <div class="agent-spec">granite-3-8b-instruct</div>
+            </div>
+            <div class="state-badge state-badge--idle" id="state-granite">IDLE</div>
+          </div>
+        </div>
+
+        <div class="tech-specs">
+          <div class="spec-row">
+            <span class="spec-key">Chunks Indexed</span>
+            <span class="spec-val" id="kbChunks">—</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Top-K Results</span>
+            <span class="spec-val">3</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Cosine Threshold</span>
+            <span class="spec-val">0.05</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-key">Engine</span>
+            <span class="spec-val">granite-3-8b-instruct</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────────────────────────────────────────
+       WORKSPACE 2 — THREAT DETECTION ENGINE
+       ─────────────────────────────────────────────────────────────────────── -->
+  <section id="ws-threat" class="workspace" role="tabpanel" aria-labelledby="tab-threat" hidden>
+    <div class="threat-layout">
+
+      <!-- LEFT: Input -->
+      <div class="card threat-input-card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg aria-hidden="true"><use href="#i-shield"/></svg>
+            <span>Forensic Input</span>
+          </div>
+          <span class="meta-tag">Paste suspicious content below</span>
+        </div>
+        <div class="threat-body">
+          <textarea id="scamInput" class="threat-textarea" rows="9" spellcheck="false"
+            placeholder="Paste suspicious SMS, WhatsApp message, email or any text for forensic analysis...&#10;&#10;Example: Your SIM will be deactivated. Install this app: bit.ly/xxxxx"
+            aria-label="Text to analyse"></textarea>
+          <div class="char-counter"><span id="charCount">0</span> characters</div>
+        </div>
+        <div class="threat-actions">
+          <button class="btn-primary" id="analyzeScamBtn">
+            <svg aria-hidden="true"><use href="#i-shield"/></svg>
+            Execute Forensic Scan
+          </button>
+          <button class="btn-ghost" id="clearScamBtn">Clear</button>
+        </div>
+        <div class="threat-samples">
+          <span class="section-label">SAMPLE VECTORS</span>
+          <div class="sample-row">
+            <button class="sample-btn" data-scam="CBI officer calling. Your Aadhaar linked account is suspicious. You are under digital arrest. Pay Rs 50000 to safe escrow account immediately to avoid jail.">
+              <svg aria-hidden="true"><use href="#i-alert"/></svg>Digital Arrest
+            </button>
+            <button class="sample-btn" data-scam="Your SIM will be blocked. Install SBI_Rewards.apk from this link to verify your KYC and get cashback refund. Enter OTP to confirm.">
+              <svg aria-hidden="true"><use href="#i-alert"/></svg>Malicious APK
+            </button>
+            <button class="sample-btn" data-scam="Hello, I want to buy your item. Scan this QR code to receive Rs 5000 payment directly to your account.">
+              <svg aria-hidden="true"><use href="#i-alert"/></svg>QR Reverse Trap
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Diagnostic -->
+      <div class="card threat-diag-card" id="threatResult" hidden>
+        <div class="card-header">
+          <div class="card-title">
+            <svg aria-hidden="true"><use href="#i-activity"/></svg>
+            <span>Threat Diagnostic</span>
+          </div>
+          <span class="risk-level-badge" id="riskLevelBadge">—</span>
+        </div>
+
+        <!-- SVG Gauge -->
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 220 130" aria-label="Risk score gauge">
+            <defs>
+              <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#10B981"/>
+                <stop offset="45%"  stop-color="#F59E0B"/>
+                <stop offset="100%" stop-color="#EF4444"/>
+              </linearGradient>
+              <filter id="arcGlow">
+                <feGaussianBlur stdDeviation="2.5" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <path d="M20 115 A90 90 0 0 1 200 115" fill="none" stroke="#1E293B" stroke-width="14" stroke-linecap="round"/>
+            <path id="gaugeArc" d="M20 115 A90 90 0 0 1 200 115" fill="none" stroke="url(#gaugeGrad)"
+                  stroke-width="14" stroke-linecap="round"
+                  stroke-dasharray="283" stroke-dashoffset="283" filter="url(#arcGlow)"/>
+            <g stroke="#334155" stroke-width="1">
+              <line x1="110" y1="28" x2="110" y2="38"/>
+              <line x1="32"  y1="83" x2="40"  y2="79"/>
+              <line x1="188" y1="83" x2="180" y2="79"/>
+            </g>
+            <line id="gaugeNeedle" x1="110" y1="113" x2="110" y2="38"
+                  stroke="#F8FAFC" stroke-width="2" stroke-linecap="round"
+                  transform-origin="110 113" filter="url(#arcGlow)"/>
+            <circle cx="110" cy="113" r="5" fill="#F8FAFC"/>
+            <text id="gaugeScore" x="110" y="100" text-anchor="middle"
+                  font-size="26" font-weight="700" fill="#F8FAFC" font-family="system-ui,sans-serif">0</text>
+            <text x="110" y="126" text-anchor="middle" font-size="8" fill="#64748B"
+                  font-family="system-ui,sans-serif" letter-spacing="2">RISK SCORE / 100</text>
+          </svg>
+        </div>
+
+        <!-- Threat vectors -->
+        <div class="vectors-section" id="vectorsSection" hidden>
+          <div class="section-label">THREAT VECTORS DETECTED</div>
+          <div id="vectorList" class="vector-list"></div>
+        </div>
+
+        <!-- Escalation protocol -->
+        <div class="escalation-card">
+          <div class="section-label">ESCALATION PROTOCOL</div>
+          <div id="escalationBody" class="escalation-body"></div>
+        </div>
+      </div>
+
+      <!-- Placeholder shown before first scan -->
+      <div class="card threat-placeholder" id="threatPlaceholder">
+        <div class="placeholder-inner">
+          <svg class="placeholder-icon" aria-hidden="true"><use href="#i-shield"/></svg>
+          <p>Paste a suspicious message on the left and run a forensic scan to see the threat diagnostic here.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────────────────────────────────────────
+       WORKSPACE 3 — CAPITAL ALLOCATOR
+       ─────────────────────────────────────────────────────────────────────── -->
+  <section id="ws-capital" class="workspace" role="tabpanel" aria-labelledby="tab-capital" hidden>
+    <div class="capital-layout">
+
+      <!-- TOP-LEFT: Input -->
+      <div class="card capital-input-card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg aria-hidden="true"><use href="#i-wallet"/></svg>
+            <span>Financial Profile</span>
+          </div>
+          <span class="meta-tag">50 / 30 / 20 Framework</span>
+        </div>
+        <div class="capital-fields">
+          <div class="field-block">
+            <label class="field-label" for="incomeInput">Monthly Take-Home Income</label>
+            <div class="field-row">
+              <span class="field-pre">INR</span>
+              <input type="number" id="incomeInput" class="field-input" placeholder="e.g. 60000" min="1" aria-label="Monthly income in rupees"/>
+            </div>
+          </div>
+          <div class="preset-block">
+            <span class="section-label">INCOME PRESETS</span>
+            <div class="preset-row">
+              <button class="preset-btn" data-income="30000">30K</button>
+              <button class="preset-btn" data-income="60000">60K</button>
+              <button class="preset-btn" data-income="100000">1L</button>
+              <button class="preset-btn" data-income="250000">2.5L</button>
+            </div>
+          </div>
+          <details class="liabilities-panel">
+            <summary class="liabilities-toggle">Add Fixed Liabilities (optional)</summary>
+            <div class="liabilities-grid">
+              <div class="field-block">
+                <label class="field-label" for="expHousing">Housing / Rent</label>
+                <div class="field-row"><span class="field-pre">INR</span><input type="number" id="expHousing" class="field-input" placeholder="0" min="0"/></div>
+              </div>
+              <div class="field-block">
+                <label class="field-label" for="expUtilities">Utilities</label>
+                <div class="field-row"><span class="field-pre">INR</span><input type="number" id="expUtilities" class="field-input" placeholder="0" min="0"/></div>
+              </div>
+              <div class="field-block">
+                <label class="field-label" for="expGroceries">Groceries</label>
+                <div class="field-row"><span class="field-pre">INR</span><input type="number" id="expGroceries" class="field-input" placeholder="0" min="0"/></div>
+              </div>
+              <div class="field-block">
+                <label class="field-label" for="expEmis">Existing EMIs</label>
+                <div class="field-row"><span class="field-pre">INR</span><input type="number" id="expEmis" class="field-input" placeholder="0" min="0"/></div>
+              </div>
+              <div class="field-block">
+                <label class="field-label" for="expDining">Dining / Social</label>
+                <div class="field-row"><span class="field-pre">INR</span><input type="number" id="expDining" class="field-input" placeholder="0" min="0"/></div>
+              </div>
+              <div class="field-block">
+                <label class="field-label" for="expEntertainment">Entertainment</label>
+                <div class="field-row"><span class="field-pre">INR</span><input type="number" id="expEntertainment" class="field-input" placeholder="0" min="0"/></div>
+              </div>
+            </div>
+          </details>
+          <button class="btn-primary btn-full" id="calcBudgetBtn">
+            <svg aria-hidden="true"><use href="#i-pie"/></svg>
+            Compute Allocation
+          </button>
+        </div>
+      </div>
+
+      <!-- TOP-RIGHT: Donut chart -->
+      <div class="card capital-chart-card" id="chartCard">
+        <div class="card-header">
+          <div class="card-title">
+            <svg aria-hidden="true"><use href="#i-pie"/></svg>
+            <span>50/30/20 Breakdown</span>
+          </div>
+          <span class="income-badge" id="incomeDisplay">—</span>
+        </div>
+        <div class="chart-body">
+          <div class="donut-wrap">
+            <canvas id="budgetChart" width="200" height="200"></canvas>
+          </div>
+          <div class="alloc-legend" id="allocLegend">
+            <div class="alloc-row alloc-row--needs">
+              <div class="alloc-swatch alloc-swatch--needs"></div>
+              <div class="alloc-copy">
+                <div class="alloc-name">Needs</div>
+                <div class="alloc-sub">50% — essential</div>
+              </div>
+              <div class="alloc-amt" id="needsAmt">—</div>
+            </div>
+            <div class="alloc-row alloc-row--wants">
+              <div class="alloc-swatch alloc-swatch--wants"></div>
+              <div class="alloc-copy">
+                <div class="alloc-name">Wants</div>
+                <div class="alloc-sub">30% — lifestyle</div>
+              </div>
+              <div class="alloc-amt" id="wantsAmt">—</div>
+            </div>
+            <div class="alloc-row alloc-row--savings">
+              <div class="alloc-swatch alloc-swatch--savings"></div>
+              <div class="alloc-copy">
+                <div class="alloc-name">Savings</div>
+                <div class="alloc-sub">20% — wealth</div>
+              </div>
+              <div class="alloc-amt" id="savingsAmt">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM-LEFT: Emergency Runway -->
+      <div class="card capital-runway-card" id="runwayCard">
+        <div class="card-header">
+          <div class="card-title">
+            <svg aria-hidden="true"><use href="#i-zap"/></svg>
+            <span>Emergency Runway &amp; Wealth Engine</span>
+          </div>
+        </div>
+        <div id="runwayBody" class="data-table"></div>
+      </div>
+
+      <!-- BOTTOM-RIGHT: Loan Amortisation -->
+      <div class="card capital-emi-card" id="emiCard">
+        <div class="card-header">
+          <div class="card-title">
+            <svg aria-hidden="true"><use href="#i-activity"/></svg>
+            <span>Loan Amortisation Matrix</span>
+          </div>
+        </div>
+        <div id="emiBody" class="data-table"></div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- =========================================================================
+     FOOTER
+     ========================================================================= -->
+<footer class="app-footer">
+  FinLit AI &mdash; Problem Statement 7 &mdash; IBM Granite on watsonx.ai &middot; Built for Digital India
+</footer>
+
+</body>
+</html>

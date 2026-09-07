@@ -1,0 +1,61 @@
+﻿# ===========================================================================
+# FinLit AI — .gitignore
+# ===========================================================================
+
+# Secrets & environment
+.env
+.env.*
+*.env.local
+!.env.example
+
+# Python cache & compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+*.pyo
+*.pdb
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+.Python
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+MANIFEST
+.eggs/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.cover
+
+# IDE / editor
+.vscode/
+.idea/
+*.suo
+*.sw?
+
+# OS generated
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Local dev helpers
+_validate.py
+_check.py
+.bob/
