@@ -61,7 +61,7 @@ User Query
 | **KnowledgeRetrievalAgent** | Chunks `financial_literacy_kb.md` into passages, builds a TF-IDF matrix at init, retrieves top-3 relevant passages per query via cosine similarity | `scikit-learn` TF-IDF + cosine similarity |
 | **ScamGuardAgent** | Evaluates any text against 14 weighted heuristic rules (fake APKs, QR traps, OTP harvesting, digital arrest, escrow fraud). Returns `risk_level`, `risk_score` (0–100), `warnings[]`, and `action_advice` | Pure Python regex scoring |
 | **BudgetPlannerAgent** | Accepts monthly income + optional expense buckets, computes exact INR allocations for Needs/Wants/Savings, 3- and 6-month emergency funds, SIP/PPF investment split, EMI amortisation, and a financial health score | Amortisation formula + heuristics |
-| **VernacularResponseAgent** | Orchestrates all three agents, builds a structured prompt, and calls IBM Granite via `ibm-watsonx-ai` SDK. Falls back to deterministic rule-based responses when credentials are not configured | `ibm-watsonx-ai` SDK |
+| **VernacularResponseAgent** | Orchestrates all three agents, builds a structured prompt, and calls IBM Granite through watsonx.ai REST endpoints. Falls back to deterministic rule-based responses when credentials are not configured | `requests` + watsonx.ai REST |
 
 ---
 
@@ -145,12 +145,13 @@ cp .env.example .env
 Open `.env` and fill in your IBM watsonx.ai credentials:
 
 ```ini
-WATSONX_APIKEY=your_ibm_cloud_api_key_here
+IBM_CLOUD_API_KEY=your_ibm_cloud_api_key_here
 WATSONX_PROJECT_ID=your_watsonx_project_id_here
 WATSONX_URL=https://us-south.ml.cloud.ibm.com
 MODEL_ID=ibm/granite-3-8b-instruct
-FLASK_SECRET_KEY=change-this-in-production
 ```
+
+`WATSONX_URL` defaults to the Dallas region. Change it only if your account or project is provisioned elsewhere.
 
 > **Note:** If credentials are left as placeholders, the app runs in **local fallback mode** — all four agents still work using deterministic rule-based responses.
 
