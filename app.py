@@ -7,10 +7,12 @@ import os
 import re
 import json
 import math
+import time
 import logging
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
+import requests
 from flask import Flask, request, jsonify, render_template
 from dotenv import load_dotenv
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -28,45 +30,126 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 # ---------------------------------------------------------------------------
-# IBM watsonx.ai client (optional — graceful fallback if credentials absent)
+# IBM watsonx.ai — pure requests implementation
+# No third-party SDK required; works with only the `requests` package.
 # ---------------------------------------------------------------------------
-_wx_model = None
 
-def _init_watsonx():
-    global _wx_model
-    api_key = os.getenv("IBM_CLOUD_API_KEY", "")
-    project_id = os.getenv("WATSONX_PROJECT_ID", "")
-    url = os.getenv("WATSONX_URL", "https://au-syd.ml.cloud.ibm.com")
+_WX_API_KEY     = os.getenv("IBM_CLOUD_API_KEY", "")
+_WX_PROJECT_ID  = os.getenv("WATSONX_PROJECT_ID", "")
+_WX_URL         = os.getenv("WATSONX_URL", "https://us-south.ml.cloud.ibm.com").rstrip("/")
+_WX_MODEL_ID    = os.getenv("MODEL_ID", "ibm/granite-3-8b-instruct")
 
-    if not api_key or not project_id:
-        logger.warning("IBM credentials not set — running in local-fallback mode.")
-        return
+_IAM_TOKEN_URL  = "https://iam.cloud.ibm.com/identity/token"
+_INFER_URL      = f"{_WX_URL}/ml/v1/text/generation?version=2023-05-29"
+
+# Cached IAM token state
+_iam_token: Optional[str] = None
+_iam_token_expiry: float = 0.0
+
+
+def _get_iam_token() -> Optional[str]:
+    """Exchange the IBM Cloud API key for a short-lived IAM Bearer token.
+    Automatically refreshes when the cached token is within 60 s of expiry.
+    Returns None and logs a warning if the exchange fails.
+    """
+    global _iam_token, _iam_token_expiry
+
+    if not _WX_API_KEY or _WX_API_KEY == "your_ibm_cloud_api_key_here":
+        return None
+
+    # Return cached token if still valid
+    if _iam_token and time.time() < _iam_token_expiry - 60:
+        return _iam_token
 
     try:
-        from ibm_watsonx_ai import Credentials
-        from ibm_watsonx_ai.foundation_models import ModelInference
-        from ibm_watsonx_ai.metanames import GenTextParamsMetaNames as GenParams
-
-        creds = Credentials(url=url, api_key=api_key)
-        params = {
-            GenParams.MAX_NEW_TOKENS: 512,
-            GenParams.MIN_NEW_TOKENS: 10,
-            GenParams.TEMPERATURE: 0.4,
-            GenParams.TOP_P: 0.9,
-            GenParams.REPETITION_PENALTY: 1.1,
-        }
-        _wx_model = ModelInference(
-            model_id="ibm-granite/granite-3-8b-instruct",
-            credentials=creds,
-            project_id=project_id,
-            params=params,
+        resp = requests.post(
+            _IAM_TOKEN_URL,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            data={
+                "grant_type": "urn:ibm:params:oauth:grant-type:apikey",
+                "apikey": _WX_API_KEY,
+            },
+            timeout=15,
         )
-        logger.info("[OK] IBM Granite model initialised.")
+        resp.raise_for_status()
+        payload = resp.json()
+        _iam_token = payload["access_token"]
+        # IBM tokens expire in 3600 s; store the absolute expiry timestamp
+        _iam_token_expiry = time.time() + int(payload.get("expires_in", 3600))
+        logger.info("[watsonx.ai] IAM token acquired (expires in %ds).",
+                    int(payload.get("expires_in", 3600)))
+        return _iam_token
     except Exception as exc:
-        logger.warning("watsonx.ai init failed: %s — local fallback active.", exc)
+        logger.warning("[watsonx.ai] IAM token exchange failed: %s", exc)
+        _iam_token = None
+        return None
 
 
-_init_watsonx()
+def _watsonx_generate(prompt: str) -> Optional[str]:
+    """Send a generation request to the watsonx.ai REST endpoint.
+    Returns the generated text string, or None on failure.
+    """
+    token = _get_iam_token()
+    if not token or not _WX_PROJECT_ID:
+        return None
+
+    if _WX_PROJECT_ID == "your_watsonx_project_id_here":
+        return None
+
+    payload = {
+        "model_id": _WX_MODEL_ID,
+        "input": prompt,
+        "parameters": {
+            "decoding_method": "greedy",
+            "temperature": 0.2,
+            "repetition_penalty": 1.1,
+            "max_new_tokens": 400,
+            "stop_sequences": [],
+        },
+        "project_id": _WX_PROJECT_ID,
+    }
+
+    try:
+        resp = requests.post(
+            _INFER_URL,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            json=payload,
+            timeout=30,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        generated = (
+            data.get("results", [{}])[0]
+            .get("generated_text", "")
+            .strip()
+        )
+        if generated:
+            logger.info("[watsonx.ai] Successfully generated response with Granite 3.0")
+        return generated or None
+    except Exception as exc:
+        logger.warning("[watsonx.ai] Inference request failed: %s", exc)
+        return None
+
+
+def _watsonx_ready() -> bool:
+    """Returns True when real credentials are present (not placeholders)."""
+    return bool(
+        _WX_API_KEY
+        and _WX_API_KEY != "your_ibm_cloud_api_key_here"
+        and _WX_PROJECT_ID
+        and _WX_PROJECT_ID != "your_watsonx_project_id_here"
+    )
+
+
+# Log startup status
+if _watsonx_ready():
+    logger.info("[watsonx.ai] Credentials loaded — Granite 3.0 active on %s", _WX_URL)
+else:
+    logger.warning("[watsonx.ai] No credentials — running in local-fallback mode.")
 
 # ===========================================================================
 # AGENT 1: KnowledgeRetrievalAgent
@@ -390,12 +473,10 @@ class VernacularResponseAgent:
         return "\n".join(parts)
 
     def _generate(self, prompt: str) -> str:
-        if _wx_model:
-            try:
-                result = _wx_model.generate_text(prompt=prompt)
-                return result.strip()
-            except Exception as exc:
-                logger.warning("Granite API error: %s — using local fallback.", exc)
+        """Try watsonx.ai REST inference first; fall back to local rules on failure."""
+        result = _watsonx_generate(prompt)
+        if result:
+            return result
         return self._local_fallback(prompt)
 
     def _local_fallback(self, prompt: str) -> str:
@@ -575,8 +656,8 @@ def calculate_budget():
 def health():
     return jsonify({
         "status": "ok",
-        "model": "ibm-granite/granite-3-8b-instruct",
-        "watsonx_connected": _wx_model is not None,
+        "model": _WX_MODEL_ID,
+        "watsonx_connected": _watsonx_ready(),
         "kb_chunks": len(kb_agent._chunks),
     })
 
